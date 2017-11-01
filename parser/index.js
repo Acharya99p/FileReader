@@ -56,9 +56,65 @@ function onError(err) {
 
 function processContent(filesMap) {
     var len = Object.keys(filesMap).length;
-
+    var last = false;
     for (let i = 1; i <= len; i++) {
-        processFile(filesMap[i], i);
+        if (i === len) last = true;
+
+        processFile(filesMap[i], i, last);
     }
 
+}
+
+function processFile(data, count, last) {
+    var col = [];
+    data.split('\n').forEach(function(row, index) {
+
+        if (index === 0) {
+            // initColumns(row);
+            col = row.split(',');
+            return;
+        }
+
+        var obj = {};
+
+        row.split(',').forEach(function(word, index) {
+            obj[col[index]] = word;
+        });
+
+        if (col.indexOf('user_name') > -1) {
+            userData.push(obj);
+        } else if (col.indexOf('course_name') > -1) {
+            courseData.push(obj);
+        } else {
+            enrollData.push(obj);
+        }
+
+    });
+
+    if (last) {
+        return filterActiveCourses();
+    }
+}
+
+function filterActiveCourses() {
+    var activeCourses = [];
+    activeCourses = courseData.filter(function(data) {
+        return data.state === 'active';
+    });
+
+    return filterStudents(activeCourses);
+}
+
+function filterStudents(courses) {
+    var studentsId = [];
+
+    courses.forEach(function(course) {
+        enrollData.forEach(function(enroll) {
+            if (course.course_id == enroll.course_id && enroll.status === 'active') {
+                studentsId.push(enroll.user_id);
+            }
+        })
+    });
+
+    return listStudents(courses, studentsId);
 }
