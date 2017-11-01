@@ -3,6 +3,11 @@ var fs = require('fs');
 var dirname = './csvs';
 
 function readFiles(dirname, onFileContent, onError) {
+
+    console.log('Reading CSVs...................');
+    console.log('\n');
+
+    
     fs.readdir(dirname, function(err, filenames) {
         if (err) {
             onError(err);
@@ -110,7 +115,7 @@ function filterStudents(courses) {
 
     courses.forEach(function(course) {
         enrollData.forEach(function(enroll) {
-            if (course.course_id == enroll.course_id && enroll.status === 'active') {
+            if (course.course_id == enroll.course_id && enroll.state === 'active') {
                 studentsId.push(enroll.user_id);
             }
         })
@@ -118,3 +123,50 @@ function filterStudents(courses) {
 
     return listStudents(courses, studentsId);
 }
+
+
+function listStudents(courses, studentsIds) {
+
+    var filteredStudents = [],
+        pushedIds = [];
+
+    for (var i = 0; i < studentsIds.length; i++) {
+        for (var j = 0; j < userData.length; j++) {
+            if (userData[j].user_id == studentsIds[i]) {
+
+                if (pushedIds.indexOf(studentsIds[i] === -1)) {
+                    pushedIds.push(studentsIds[i]);
+                    filteredStudents.push(userData[j]);
+                    break;
+                }
+
+            }
+        }
+    }
+
+    return printList(courses, filteredStudents);
+}
+
+function printList(courses, enrolledStudents) {
+
+    console.log('List of active courses in file are');
+    console.log('\n');
+
+    console.log(courses);
+    console.log('\n\n\n');
+
+    console.log('List of students for thsese courses are');
+    console.log('\n\n');
+    console.log(enrolledStudents);
+}
+
+function initColumns(data) {
+    data.split(',').forEach(function(col) {
+        if (!wholeData[col]) {
+            wholeData[col] = [];
+        }
+
+    });
+}
+
+readFiles(dirname, onFileContent, onError);
