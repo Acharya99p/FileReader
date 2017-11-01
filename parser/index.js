@@ -8,9 +8,12 @@ function readFiles(dirname, onFileContent, onError) {
             onError(err);
             return;
         }
-        var total = filenames.length-1, count=0, last=true;
 
-        filenames.forEach(function(filename) {
+        var total = filenames.length - 1,
+            count = 0,
+            last = false;
+
+        filenames.forEach(function(filename,index,arr) {
             fs.readFile(dirname + '/' + filename, 'utf-8', function(err, content, total) {
                 if (err) {
                     onError(err);
@@ -18,10 +21,33 @@ function readFiles(dirname, onFileContent, onError) {
                 }
                 count++;
 
-                if(count ===total)
-                onFileContent(filename, content,last);
+                if (count === arr.length) {
+                    last = true;
+                }
+
+                console.log(total);
+
+                onFileContent(filename, content, last);
             });
         });
     });
+}
+
+
+var filesMap = {};
+
+var wholeData = {};
+
+function onFileContent(name, content, isLast) {
+    var key = name.split('.csv')[0].substring(1, name.length);
+    filesMap[key] = content;
+
+    if (isLast) {
+        processContent(filesMap);
+    }
+}
+
+function onError(err) {
+    console.error(err);
 }
 
