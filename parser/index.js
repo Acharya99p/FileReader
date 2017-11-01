@@ -13,7 +13,7 @@ function readFiles(dirname, onFileContent, onError) {
             count = 0,
             last = false;
 
-        filenames.forEach(function(filename,index,arr) {
+        filenames.forEach(function(filename, index, arr) {
             fs.readFile(dirname + '/' + filename, 'utf-8', function(err, content, total) {
                 if (err) {
                     onError(err);
@@ -24,8 +24,6 @@ function readFiles(dirname, onFileContent, onError) {
                 if (count === arr.length) {
                     last = true;
                 }
-
-                console.log(total);
 
                 onFileContent(filename, content, last);
             });
@@ -38,8 +36,13 @@ var filesMap = {};
 
 var wholeData = {};
 
+var userData = [],
+    courseData = [],
+    enrollData = [];
+
 function onFileContent(name, content, isLast) {
-    var key = name.split('.csv')[0].substring(1, name.length);
+    var key = name.split('.csv')[0].replace(/^0+/, '');
+
     filesMap[key] = content;
 
     if (isLast) {
@@ -51,3 +54,11 @@ function onError(err) {
     console.error(err);
 }
 
+function processContent(filesMap) {
+    var len = Object.keys(filesMap).length;
+
+    for (let i = 1; i <= len; i++) {
+        processFile(filesMap[i], i);
+    }
+
+}
